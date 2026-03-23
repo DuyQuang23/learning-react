@@ -1,0 +1,146 @@
+[
+    {
+        "id": 1, 
+        "code": "EMP001", 
+        "name": "Nguyễn Văn A", 
+        "title": "Frontend Dev",   
+        "phone": "0901 234 567", 
+        "email": "a.nguyen@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 2, 
+        "code": "EMP002", 
+        "name": "Trần Thị B", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 3, 
+        "code": "EMP003", 
+        "name": "Lê Văn C", 
+        "title": "UI/UX Designer",   
+        "phone": "0903 456 789", 
+        "email": "c.le@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 4, 
+        "code": "EMP004", 
+        "name": "Phạm Văn D", 
+        "title": "Manager",   
+        "phone": "0904 567 890", 
+        "email": "d.pham@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 5, 
+        "code": "EMP005", 
+        "name": "Trần Thị BI", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 6, 
+        "code": "EMP006", 
+        "name": "Trần Thị BH", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 7, 
+        "code": "EMP007", 
+        "name": "Trần Thị BG", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 8, 
+        "code": "EMP008", 
+        "name": "Trần Thị BF", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 9, 
+        "code": "EMP009", 
+        "name": "Trần Thị BE", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 10, 
+        "code": "EMP010", 
+        "name": "Trần Thị BD", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 11, 
+        "code": "EMP011", 
+        "name": "Trần Thị BC", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 12, 
+        "code": "EMP012", 
+        "name": "Trần Thị BB", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 13, 
+        "code": "EMP003", 
+        "name": "Trần Thị BA", 
+        "title": "Backend Dev",   
+        "phone": "0902 345 678", 
+        "email": "b.tran@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 14, 
+        "code": "EMP014", 
+        "name": "Phạm Văn DA", 
+        "title": "Manager",   
+        "phone": "0904 567 890", 
+        "email": "d.pham@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 15, 
+        "code": "EMP015", 
+        "name": "Phạm Văn DB", 
+        "title": "Manager",   
+        "phone": "0904 567 890", 
+        "email": "d.pham@company.com",
+        "status": "Đang làm việc"
+    },
+    {
+        "id": 16, 
+        "code": "EMP016", 
+        "name": "Phạm Văn DC", 
+        "title": "Manager",   
+        "phone": "0904 567 890", 
+        "email": "d.pham@company.com",
+        "status": "Đang làm việc"
+    }
+]
