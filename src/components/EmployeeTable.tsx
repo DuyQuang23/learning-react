@@ -1,12 +1,43 @@
 import React from "react";
-import type { Employee } from "../types/Employee";
+import type { Employee } from "../types/employee";
+import { memo } from "react";
 
+
+const highlightText = (text: string, searchTearm: string) => {
+
+    if(!searchTearm.trim()) return text;
+    
+    const parts = text.split(new RegExp(`(${searchTearm})`,'gi'));
+
+    return (
+        <span>
+            {parts.map((part,index) =>
+                part.toLowerCase() == searchTearm.toLocaleLowerCase() ? (
+                    <mark key={index} className="bg-red-100 text-yellow-900 rounded-sm px-0.5 font-bold">
+                        {part}
+                    </mark>
+                ) : (
+                    part
+                )
+            )}
+        </span>
+    );
+};
 
 interface EmployeeTableProps {
     employees: Employee[];
+    searchTerm: string;
+    onEdit: (emp: Employee) => void;    
 }
 
-const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees }) => {
+const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, searchTerm, onEdit}) => {
+    const handleLog = (empId: number) => {
+        const clickedEmp = employees.find(emp => emp.id == empId);
+
+        if(clickedEmp) {
+            console.table(clickedEmp);
+        }
+    }
     return (
         <div className="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-100">
             <table className="min-w-full divide-y divide-slate-200">
@@ -16,6 +47,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees }) => {
                         <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Chức vụ</th>
                         <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Email</th>
                         <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                        <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -35,7 +67,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees }) => {
                                             {emp.name.charAt(0)}
                                         </div>
                                         <span className={`font-semibold ${isManager ? 'text-blue-900' : 'text-slate-700'}`}>
-                                            {emp.name}
+                                            {highlightText(emp.name,searchTerm)}
                                         </span>
                                     </div>
                                 </td>
@@ -61,6 +93,21 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees }) => {
                                         </span>
                                     </div>
                                 </td>
+                                {/* action */}
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button 
+                                        onClick={() => handleLog(emp.id)}
+                                        className="text-center py-2 font-light text-blue-700 text-xs pl-5"
+                                    >
+                                        Xem chi tiết
+                                    </button>
+                                    <button 
+                                        onClick={() => onEdit(emp)}
+                                        className="text-center py-2 font-light text-blue-700 text-xs pl-5"
+                                    >
+                                        Sửa thông tin
+                                    </button>
+                                </td>
                             </tr>
                         );
                     })}
@@ -72,4 +119,4 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees }) => {
 
 };
 
-export default EmployeeTable;
+export default memo(EmployeeTable);

@@ -1,32 +1,85 @@
 
 import EmployeeList from './components/EmployeeList.tsx';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { Employee } from './types/employee.ts';
 import EmployeeHeader from './components/EmployeeHeader.tsx';
 import EmployeeTable from './components/EmployeeTable.tsx';
 import EmployeeSearch from './components/EmployeeSearch.tsx';
 import EmployeeFilter from './components/EmployeeFilter.tsx';
+import EditModal from './components/EditModal.tsx';
 
 function App() {
 
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>( () => {
+    const data = localStorage.getItem('employee_data');
+    //console.log(data);
+    return data ? JSON.parse(data) : [];
+    
+  });
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTitle, setSelectedTitle] = useState('All');
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [isAddModalOpen , setIsAddModalOpen] = useState(false);
+
+  useEffect( () => {
+    localStorage.setItem('employee_data', JSON.stringify(employees));
+  },[employees]);
 
   useEffect(() => {
-    fetch('/data/employee.json')
+    const data = localStorage.getItem('employee_data');
+    if(!data || JSON.parse(data).length == 0)
+    {
+      fetch('/data/employee.json')
       .then((res) => res.json())
-      .then((data) => setEmployees(data))
+      .then((data) => {
+        setEmployees(data);
+        localStorage.setItem('employee_data', JSON.stringify(data));
+      })
       .catch((err) => console.error("Loi", err));
+    }
   }, []);
 
-  const filterEmployees = employees.filter((emp) => {
-    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTitle = selectedTitle === 'All' || emp.title === selectedTitle;
+  const handleStartEdit = useCallback ((emp: Employee) => {
+    console.log("dang sua",emp.name);
+    setEditingEmployee(emp);
+  },[]);
 
-    return matchesSearch && matchesTitle;
-  });
+  const handleConfirmUpdate =  (updatedEmp: Employee)=> {
+    setEmployees((prev) => {
+      const newEmployeeList = prev.map(emp => emp.id === updatedEmp.id ? updatedEmp : emp);
+      localStorage.setItem('employee_data',JSON.stringify(newEmployeeList));
+      return newEmployeeList;
+    });
+    setEditingEmployee(null);
+  };
+  
+  const handleConfirmAdd = (emp: Employee) => {
+
+    const newEmployee = {
+      ...emp,
+      id : Date.now()
+    };  
+    setEmployees( (prev) => [newEmployee,...prev]);
+    setIsAddModalOpen(false);
+  }
+  const emptyEmployee: Employee = {
+    id: 0,
+    code: '',
+    name: '',
+    title: '',
+    email: '',
+    phone: '',
+    status: 'Đang làm việc',
+  };
+  const filterEmployees = useMemo(() => {
+    // console.log("Dang tim ...");
+    return employees.filter((emp) => {
+      const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTitle = selectedTitle === 'All' || emp.title === selectedTitle;
+      return matchesSearch && matchesTitle;
+    });
+  }, [searchTerm, selectedTitle, employees]);
 
   const handleAddEmployee = () => {
 
@@ -34,7 +87,7 @@ function App() {
       id : Date.now(),
       code : "PM1234",
       name : "Nhân viên mới",
-      title : "newEmployee",
+      title : "Intern",
       phone : "0981975400",
       email : "abv@company.com",
       status : "Đang làm việc",
@@ -45,19 +98,20 @@ function App() {
   };
 
   const handleDeleteAllEmployee = () => {
-
     const isConfirm = window.confirm("Sure?")
     if(isConfirm) {
       setEmployees([]);
     }
   }
 
+  
+
 
   const uniqueTitles = Array.from(new Set(employees.map(emp => emp.title))).filter(Boolean);
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <EmployeeHeader total={employees.length} />
+      <EmployeeHeader total={employees.length} onAddClick={() => setIsAddModalOpen(true)}/>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
 
@@ -109,15 +163,43 @@ function App() {
         {/* render */}
         {filterEmployees.length > 0 ? (
           viewMode === 'card' ? (
-            <EmployeeList employees={filterEmployees} />
+            <EmployeeList 
+              employees={filterEmployees} 
+              searchTerm={searchTerm} 
+              onEdit={handleStartEdit} 
+             
+            />
           ) : (
-            <EmployeeTable employees={filterEmployees} />
+            <EmployeeTable 
+              employees={filterEmployees} 
+              searchTerm={searchTerm} 
+              onEdit={handleStartEdit}      
+            />
           )
-        ) : (
-          <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200">
-            <p className="text-slate-400 font-medium">Không tìm thấy kết quả phù hợp cho yêu cầu của bạn.</p>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200">
+              <p className="text-slate-400 font-medium">Không tìm thấy kết quả phù hợp.</p>
+            </div>
+          )}
+
+          {/* modal edit */}
+          {editingEmployee && (
+            <EditModal
+              employee={editingEmployee}
+              onClose={() => setEditingEmployee(null)}
+              onConfirm={handleConfirmUpdate}
+              mode={'edit'}
+            />
+          )}
+          {/* modal add*/}
+          {isAddModalOpen && (
+            <EditModal
+              employee={emptyEmployee} 
+              onClose={() => setIsAddModalOpen(false)} 
+              onConfirm={handleConfirmAdd} 
+              mode={'add'} 
+            />
+          )}
       </main>
     </div>
   );

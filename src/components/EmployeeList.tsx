@@ -1,13 +1,16 @@
 import React from "react";
 import EmployeeCard from "./EmployeeCard";
 import type { Employee } from "../types/employee";
+import { memo } from "react";
 
 
 interface EmployeeListProps {
   employees: Employee[];
+  searchTerm: string;
+  onEdit: (emp: Employee) => void;
 }
 
-const EmployeeList: React.FC<EmployeeListProps> = ({employees}) => {
+const EmployeeList: React.FC<EmployeeListProps> = ({employees,searchTerm, onEdit}) => {
     
 
     return (
@@ -20,7 +23,9 @@ const EmployeeList: React.FC<EmployeeListProps> = ({employees}) => {
                         return (
                             <EmployeeCard key={emp.id}
                                         employee={emp}
-                                        highlight={isManager} />
+                                        highlight={isManager} 
+                                        searchTerm={searchTerm}
+                                        onEdit={onEdit}/>
                         );
                 
                      })
@@ -32,4 +37,4 @@ const EmployeeList: React.FC<EmployeeListProps> = ({employees}) => {
     );
 };
 
-export default EmployeeList;
+export default memo(EmployeeList);

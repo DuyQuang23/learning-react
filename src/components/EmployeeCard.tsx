@@ -1,18 +1,50 @@
 import React from "react";
 import type { Employee } from "../types/employee";
 import iconMail from '../assets/icon-mail.png';
+import { memo } from "react";
+
+
+const highlightText = (text: string, searchTearm: string) => {
+
+    if(!searchTearm.trim()) return text;
+    
+    const parts = text.split(new RegExp(`(${searchTearm})`,'gi'));
+
+    return (
+        <span>
+            {parts.map((part,index) =>
+                part.toLowerCase() == searchTearm.toLocaleLowerCase() ? (
+                    <mark key={index} className="bg-red-100 text-yellow-900 rounded-sm px-0.5 font-bold">
+                        {part}
+                    </mark>
+                ) : (
+                    part
+                )
+            )}
+        </span>
+    );
+};
+
+
+
 
 interface EmployeeCardProps {
     employee: Employee;
-    highlight: boolean; 
+    highlight: boolean;
+    searchTerm: string;
+    onEdit: (emp: Employee) => void;
 }
 
-const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee, highlight }) => {
+const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee, highlight, searchTerm, onEdit}) => {
     const isWorking = employee.status === 'Đang làm việc';
 
     const getInit = (name: string) => {
         return name.split(' ').map((n) => n[0]).join('').toUpperCase();
     };
+
+    const handleLog = () => {
+        console.table(employee);
+    }
 
     return (
         <div className={`group rounded-2xl p-6 shadow-sm border transition-all duration-300 cursor-pointer 
@@ -37,7 +69,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee, highlight }) => {
 
             <div className="space-y-1">
                 <h3 className={`font-bold text-lg group-hover:transition-colors ${highlight ? 'text-blue-900 group-hover:text-black' : 'text-slate-800 group-hover:text-blue-600'}`}>
-                    {employee.name}
+                    {highlightText(employee.name,searchTerm)}
                 </h3>
                 <p className="text-blue-500 text-sm font-medium">
                     {employee.title}
@@ -49,9 +81,15 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee, highlight }) => {
                         {employee.email}
                     </span>
                 </div>
+                <button className="text-center py-2 font-light text-blue-700 text-xs" onClick={handleLog}>
+                    Xem chi tiết
+                </button>
+                <button className="text-center py-2 font-light text-blue-700 text-xs pl-20" onClick={() => onEdit(employee)}>
+                    Sửa thông tin
+                </button>
             </div>
         </div>
     );
 };
 
-export default EmployeeCard;
+export default memo(EmployeeCard);
