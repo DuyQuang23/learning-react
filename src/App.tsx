@@ -1,6 +1,6 @@
 
 import EmployeeList from './components/EmployeeList.tsx';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Employee } from './types/employee.ts';
 import EmployeeHeader from './components/EmployeeHeader.tsx';
 import EmployeeTable from './components/EmployeeTable.tsx';
@@ -28,6 +28,30 @@ function App() {
     return matchesSearch && matchesTitle;
   });
 
+  const handleAddEmployee = () => {
+
+    const newEmployee : Employee = {
+      id : Date.now(),
+      code : "PM1234",
+      name : "Nhân viên mới",
+      title : "newEmployee",
+      phone : "0981975400",
+      email : "abv@company.com",
+      status : "Đang làm việc",
+    };
+
+    setEmployees( (prevEmployees) => [newEmployee,...prevEmployees]);
+
+  };
+
+  const handleDeleteAllEmployee = () => {
+
+    const isConfirm = window.confirm("Sure?")
+    if(isConfirm) {
+      setEmployees([]);
+    }
+  }
+
 
   const uniqueTitles = Array.from(new Set(employees.map(emp => emp.title))).filter(Boolean);
 
@@ -42,6 +66,18 @@ function App() {
 
             {/* search */}
             <EmployeeSearch onSearch={(value) => setSearchTerm(value)} />
+            
+            <button
+              onClick={handleAddEmployee}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-200">
+              Thêm nhanh
+            </button>
+            <button
+              onClick={handleDeleteAllEmployee}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-200">
+              Xoá tất cả
+            </button>
+            
 
             {/* card + table */}
             <div className="flex bg-slate-100 p-1 rounded-xl">
