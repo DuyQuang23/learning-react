@@ -1,3 +1,9 @@
+
+export interface Skill {
+  name: string;
+  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
+}
+
 export interface Employee {
     id: number;
     code: string;
@@ -6,4 +12,5 @@ export interface Employee {
     phone: string;
     email: string;
     status: 'Đang làm việc' | 'Đã nghỉ việc';
+    skills?: Skill[];
 }

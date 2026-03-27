@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Employee } from "../types/employee";
+import type { Employee, Skill } from "../types/employee";
 
 interface EditModalProps {
     mode: 'add' | 'edit'
@@ -18,9 +18,28 @@ const TITLES = [
 
 const EditModal: React.FC<EditModalProps> = ({mode, employee, onClose, onConfirm}) =>  {
     const [formData, setFormData] = useState<Employee>(employee);
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault(); // ko load lai trang
-        onConfirm(formData);
+    const [skills, setSkills] = useState<Skill[]>(employee.skills || []);
+
+    const addSkill = () => {
+        setSkills([...skills, { name: '', level: 'Beginner' }]);
+    };
+
+    const removeSkill = (index: number) => {
+        setSkills(skills.filter((_, i) => i !== index));
+    };
+
+    const handleSkillChange = (index: number, field: keyof Skill, value: string) => {
+        const newSkills = [...skills];
+        newSkills[index] = { ...newSkills[index], [field]: value };
+        setSkills(newSkills);
+    };
+
+    const handleSubmit = () => {
+        const finalData = {
+            ...formData, 
+            skills: skills   
+        };
+        onConfirm(finalData);
     };
     const handleTitleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value; 
@@ -77,6 +96,56 @@ const EditModal: React.FC<EditModalProps> = ({mode, employee, onClose, onConfirm
                     </option>
                     ))}
                 </select>
+                <div className="mt-6 space-y-4">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-bold text-slate-700">Kỹ năng chuyên môn</h3>
+                        <button 
+                            type="button"
+                            onClick={addSkill}
+                            className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-lg hover:bg-blue-100 font-bold"
+                            >
+                        + Thêm kỹ năng
+                        </button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {skills.map((skill, index) => (
+                        <div key={index} className="flex gap-3 items-end bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div className="flex-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Tên kỹ năng</label>
+                            <input
+                                value={skill.name}
+                                onChange={(e) => handleSkillChange(index, 'name', e.target.value)}
+                                placeholder="Ví dụ: React, Java..."
+                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-blue-500"
+                            />
+                            </div>
+                            
+                            <div className="w-1/3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Cấp độ</label>
+                            <select
+                                value={skill.level}
+                                onChange={(e) => handleSkillChange(index, 'level', e.target.value as Skill['level'])}
+                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-blue-500"
+                            >
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                                <option value="Expert">Expert</option>
+                            </select>
+                            </div>
+
+                            <button
+                            type="button"
+                            onClick={() => removeSkill(index)}
+                            className="p-2.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                            Xoá kĩ năng
+                            </button>
+                        </div>
+                        ))}
+                    </div>
+                </div>
             </div>
             {/* email */}
             <div>
