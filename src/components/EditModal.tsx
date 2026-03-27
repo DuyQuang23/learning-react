@@ -8,12 +8,31 @@ interface EditModalProps {
     onConfirm: (emp: Employee) => void;
 }
 
+const TITLES = [
+  { id: 'mng', name: 'Manager' },
+  { id: 'fe', name: 'FrontEnd Dev' },
+  { id: 'be', name: 'Backend Dev' },
+  { id: 'uiux', name: 'UI/UX Designer' },
+  { id: 'tt', name: 'Intern' }
+];
+
 const EditModal: React.FC<EditModalProps> = ({mode, employee, onClose, onConfirm}) =>  {
     const [formData, setFormData] = useState<Employee>(employee);
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault(); // ko load lai trang
         onConfirm(formData);
     };
+    const handleTitleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value; 
+    
+    const text = e.target.options[e.target.selectedIndex].text;
+
+    console.log(`vừa chọn: ID=${val}, Text=${text}`);
+    setFormData({ 
+      ...formData, 
+      title: text 
+    });
+  };
 
     return (
     
@@ -45,13 +64,19 @@ const EditModal: React.FC<EditModalProps> = ({mode, employee, onClose, onConfirm
             {/* title */}
             <div>
                 <label className="block text-sm font-semibold text-slate-600 mb-1 ml-1">Chức danh</label>
-                <input 
-                value={formData.title} 
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
-                placeholder="Ví dụ: Manager, Developer..."
-                required
-                />
+                <select 
+                    value={TITLES.find(t => t.name === formData.title)?.id || ""} // tim Id theo ten title
+                    onChange={handleTitleChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-white transition-all appearance-none cursor-pointer"
+                    required
+                >
+                    <option value="" disabled>-- Chọn chức vụ --</option>
+                    {TITLES.map(title => (
+                    <option key={title.id} value={title.id}>
+                        {title.name}
+                    </option>
+                    ))}
+                </select>
             </div>
             {/* email */}
             <div>

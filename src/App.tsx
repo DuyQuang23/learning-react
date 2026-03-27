@@ -7,6 +7,7 @@ import EmployeeTable from './components/EmployeeTable.tsx';
 import EmployeeSearch from './components/EmployeeSearch.tsx';
 import EmployeeFilter from './components/EmployeeFilter.tsx';
 import EditModal from './components/EditModal.tsx';
+import * as XLSX from 'xlsx';
 
 function App() {
 
@@ -104,14 +105,85 @@ function App() {
     }
   }
 
+
+  const handleExportExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(employees); // tao worksheet
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Danh sach nhan vien");
+    XLSX.writeFile(workbook,"Danh sach nhan vien.xlsx");
+  };
   
+  const handleImportExcel = (e : React.ChangeEvent<HTMLInputElement>) => {
+
+    const file = e.target.files?.[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const data = event.target?.result;
+      const workbook = XLSX.read(data, {type: `binary` });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+
+      const rawData = XLSX.utils.sheet_to_json(sheet); // chuyen sheet -> json
+      console.table(rawData); 
+      
+      const validEmployees: Employee[] = [];
+      const err: string[] = [];
+
+      rawData.forEach( (row : any, index) => {
+
+
+        const rowNum = index + 2; // dong trong excel bat dau tu 2
+        if(!row.name || !row.email || !row.code || !row.phone || !row.title) {
+          
+          err.push(`${rowNum} : thieu du lieu`);
+          return
+        }
+        
+
+        if(!row.email.includes('@')) {
+            err.push(`${rowNum} : sai dinh dang email `);
+            return;
+          }
+        
+
+        validEmployees.push({
+          ...row,
+          id: Date.now() + index,
+          status: row.status
+        });
+
+      });
+
+      if(err.length > 0) {
+        alert(`co ${err.length} loi :\n` + err.join('\n'));
+      }
+
+      if(validEmployees.length > 0) {
+        if(window.confirm(`Xac nhan them ${validEmployees.length} nhan vien`)) {
+          setEmployees(prev => [...validEmployees,...prev]);
+        }
+      }
+    
+
+    };
+
+    reader.readAsArrayBuffer(file); // reset input
+  e.target.value = '';
+
+  };
 
 
   const uniqueTitles = Array.from(new Set(employees.map(emp => emp.title))).filter(Boolean);
 
   return (
     <div className="min-h-screen bg-slate-50/50">
-      <EmployeeHeader total={employees.length} onAddClick={() => setIsAddModalOpen(true)}/>
+      <EmployeeHeader total={employees.length} onAddClick={() => setIsAddModalOpen(true)}
+        onImport={handleImportExcel} 
+        onExport={handleExportExcel}
+      />
 
       <main className="max-w-7xl mx-auto px-6 py-8">
 
