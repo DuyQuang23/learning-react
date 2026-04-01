@@ -1,4 +1,3 @@
-
 import EmployeeList from './components/EmployeeList.tsx';
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { Employee } from './types/employee.ts';
@@ -8,112 +7,130 @@ import EmployeeSearch from './components/EmployeeSearch.tsx';
 import EmployeeFilter from './components/EmployeeFilter.tsx';
 import EditModal from './components/EditModal.tsx';
 import * as XLSX from 'xlsx';
-
+import ImportModal from './components/ImportModal.tsx';
 function App() {
 
-  const [employees, setEmployees] = useState<Employee[]>( () => {
-    const data = localStorage.getItem('employee_data');
-    //console.log(data);
-    return data ? JSON.parse(data) : [];
+    const [employees, setEmployees] = useState<Employee[]>( () => {
+      const data = localStorage.getItem('employee_data');
+      //console.log(data);
+      return data ? JSON.parse(data) : [];
+      
+    });
+    const [viewMode, setViewMode] = useState<'card' | 'table'>('table');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedTitle, setSelectedTitle] = useState('All');
+    const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+    const [isAddModalOpen , setIsAddModalOpen] = useState(false);
+
+    useEffect( () => {
+      localStorage.setItem('employee_data', JSON.stringify(employees));
+    },[employees]);
+
+    useEffect(() => {
+      const data = localStorage.getItem('employee_data');
+      if(!data || JSON.parse(data).length == 0)
+      {
+        fetch('/data/employee.json')
+        .then((res) => res.json())
+        .then((data) => {
+          setEmployees(data);
+          localStorage.setItem('employee_data', JSON.stringify(data));
+        })
+        .catch((err) => console.error("Loi", err));
+      }
+    }, []);
+
+    const handleStartEdit = useCallback ((emp: Employee) => {
+      console.log("dang sua",emp.name);
+      setEditingEmployee(emp);
+    },[]);
+
+    const handleConfirmUpdate =  (updatedEmp: Employee)=> {
+      setEmployees((prev) => {
+        const newEmployeeList = prev.map(emp => emp.id === updatedEmp.id ? updatedEmp : emp);
+        localStorage.setItem('employee_data',JSON.stringify(newEmployeeList));
+        return newEmployeeList;
+      });
+      setEditingEmployee(null);
+    };
     
-  });
-  const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTitle, setSelectedTitle] = useState('All');
-  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-  const [isAddModalOpen , setIsAddModalOpen] = useState(false);
+    const handleConfirmAdd = (emp: Employee) => {
 
-  useEffect( () => {
-    localStorage.setItem('employee_data', JSON.stringify(employees));
-  },[employees]);
-
-  useEffect(() => {
-    const data = localStorage.getItem('employee_data');
-    if(!data || JSON.parse(data).length == 0)
-    {
-      fetch('/data/employee.json')
-      .then((res) => res.json())
-      .then((data) => {
-        setEmployees(data);
-        localStorage.setItem('employee_data', JSON.stringify(data));
-      })
-      .catch((err) => console.error("Loi", err));
+      const newEmployee = {
+        ...emp,
+        id : Date.now()
+      };  
+      setEmployees( (prev) => [newEmployee,...prev]);
+      setIsAddModalOpen(false);
     }
-  }, []);
+    const emptyEmployee: Employee = {
+      id: 0,
+      code: '',
+      name: '',
+      title: '',
+      email: '',
+      phone: '',
+      status: 'Đang làm việc',
+    };
+    const filterEmployees = useMemo(() => {
+      // console.log("Dang tim ...");
+      return employees.filter((emp) => {
+        const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesTitle = selectedTitle === 'All' || emp.title === selectedTitle;
+        return matchesSearch && matchesTitle;
+      });
+    }, [searchTerm, selectedTitle, employees]);
 
-  const handleStartEdit = useCallback ((emp: Employee) => {
-    console.log("dang sua",emp.name);
-    setEditingEmployee(emp);
-  },[]);
+    const handleAddEmployee = () => {
 
-  const handleConfirmUpdate =  (updatedEmp: Employee)=> {
-    setEmployees((prev) => {
-      const newEmployeeList = prev.map(emp => emp.id === updatedEmp.id ? updatedEmp : emp);
-      localStorage.setItem('employee_data',JSON.stringify(newEmployeeList));
-      return newEmployeeList;
-    });
-    setEditingEmployee(null);
-  };
-  
-  const handleConfirmAdd = (emp: Employee) => {
+      const newEmployee : Employee = {
+        id : Date.now(),
+        code : "PM1234",
+        name : "Nhân viên mới",
+        title : "Intern",
+        phone : "0981975400",
+        email : "abv@company.com",
+        status : "Đang làm việc",
+      };
 
-    const newEmployee = {
-      ...emp,
-      id : Date.now()
-    };  
-    setEmployees( (prev) => [newEmployee,...prev]);
-    setIsAddModalOpen(false);
-  }
-  const emptyEmployee: Employee = {
-    id: 0,
-    code: '',
-    name: '',
-    title: '',
-    email: '',
-    phone: '',
-    status: 'Đang làm việc',
-  };
-  const filterEmployees = useMemo(() => {
-    // console.log("Dang tim ...");
-    return employees.filter((emp) => {
-      const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTitle = selectedTitle === 'All' || emp.title === selectedTitle;
-      return matchesSearch && matchesTitle;
-    });
-  }, [searchTerm, selectedTitle, employees]);
+      setEmployees( (prevEmployees) => [newEmployee,...prevEmployees]);
 
-  const handleAddEmployee = () => {
-
-    const newEmployee : Employee = {
-      id : Date.now(),
-      code : "PM1234",
-      name : "Nhân viên mới",
-      title : "Intern",
-      phone : "0981975400",
-      email : "abv@company.com",
-      status : "Đang làm việc",
     };
 
-    setEmployees( (prevEmployees) => [newEmployee,...prevEmployees]);
-
-  };
-
-  const handleDeleteAllEmployee = () => {
-    const isConfirm = window.confirm("Sure?")
-    if(isConfirm) {
-      setEmployees([]);
+    const handleDeleteAllEmployee = () => {
+      const isConfirm = window.confirm("Sure?")
+      if(isConfirm) {
+        setEmployees([]);
+      }
     }
-  }
 
 
-  const handleExportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(employees); // tao worksheet
+    const handleExportExcel = () => {
+      const worksheet = XLSX.utils.json_to_sheet(employees); // tao worksheet
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Danh sach nhan vien");
-    XLSX.writeFile(workbook,"Danh sach nhan vien.xlsx");
-  };
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Danh sach nhan vien");
+      XLSX.writeFile(workbook,"Danh sach nhan vien.xlsx");
+    };
   
+    interface ExcelRow {
+      name?: string;
+      email?: string;
+      code?: string;
+      phone?: string;
+      title?: string;
+      status?: string; 
+    }
+
+    interface InvalidRow {
+      row: ExcelRow; 
+      error: string;
+    }
+
+  const [showPreview, setShowPreview] = useState(false);
+  const [tempValid, setTempValid] = useState<any[]>([]);
+  const [tempInvalid, setTempInvalid] = useState<{row: any, error: string}[]>([]);
+
   const handleImportExcel = (e : React.ChangeEvent<HTMLInputElement>) => {
 
     const file = e.target.files?.[0];
@@ -122,60 +139,40 @@ function App() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const data = event.target?.result;
-      const workbook = XLSX.read(data, {type: `binary` });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
+      const workbook = XLSX.read(data, {type: `array` });
+      const rawData: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
-      const rawData = XLSX.utils.sheet_to_json(sheet); // chuyen sheet -> json
-      console.table(rawData); 
-      
-      const validEmployees: Employee[] = [];
-      const err: string[] = [];
+      const valid: any[] = [];
+      const invalid: any[] = [];
 
       rawData.forEach( (row : any, index) => {
 
-
         const rowNum = index + 2; // dong trong excel bat dau tu 2
+        let error = "";
         if(!row.name || !row.email || !row.code || !row.phone || !row.title) {
+          error = "Thieu thong tin bat buoc";
+          invalid.push({row, error: `Dòng ${rowNum}: ${error}`});
           
-          err.push(`${rowNum} : thieu du lieu`);
-          return
         }
-        
-
-        if(!row.email.includes('@')) {
-            err.push(`${rowNum} : sai dinh dang email `);
-            return;
-          }
-        
-
-        validEmployees.push({
-          ...row,
-          id: Date.now() + index,
-          status: row.status
-        });
+        else {
+          valid.push({...row, id: Date.now() + index});
+        }
 
       });
 
-      if(err.length > 0) {
-        alert(`co ${err.length} loi :\n` + err.join('\n'));
-      }
-
-      if(validEmployees.length > 0) {
-        if(window.confirm(`Xac nhan them ${validEmployees.length} nhan vien`)) {
-          setEmployees(prev => [...validEmployees,...prev]);
-        }
-      }
-    
-
+      setTempValid(valid);
+      setTempInvalid(invalid);
+      setShowPreview(true); 
     };
 
     reader.readAsArrayBuffer(file); // reset input
-  e.target.value = '';
-
+    e.target.value = '';
   };
 
-
+  const handleSaveImport = () => {
+    setEmployees(prev => [...tempValid, ...prev]);
+    setShowPreview(false);
+  };
   const uniqueTitles = Array.from(new Set(employees.map(emp => emp.title))).filter(Boolean);
 
   return (
@@ -270,6 +267,14 @@ function App() {
               onClose={() => setIsAddModalOpen(false)} 
               onConfirm={handleConfirmAdd} 
               mode={'add'} 
+            />
+          )}
+          {showPreview && (
+            <ImportModal 
+              validData={tempValid}
+              invalidData={tempInvalid}
+              onClose={() => setShowPreview(false)}
+              onSave={handleSaveImport}
             />
           )}
       </main>
